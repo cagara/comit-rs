@@ -1,6 +1,6 @@
 use crate::swap_protocols::rfc003::{
     ethereum::{ByteCode, Htlc, Seconds},
-    SecretHash,
+    Secret, SecretHash,
 };
 use ethereum_support::{Address, Bytes, U256};
 
@@ -25,6 +25,7 @@ impl EtherHtlc {
         include_str!("./contract_templates/out/ether_deploy_header.asm.hex");
     const CONTRACT_START_POSITION_PLACEHOLDER: &'static str = "1001";
     const CONTRACT_LENGTH_PLACEHOLDER: &'static str = "2002";
+    const SECRET_SIZE_PLACEHOLDER: &'static str = "6006";
 
     pub fn new(
         refund_timeout: Seconds,
@@ -63,13 +64,15 @@ impl Htlc for EtherHtlc {
         let redeem_address = format!("{:x}", self.redeem_address);
         let refund_address = format!("{:x}", self.refund_address);
         let secret_hash = format!("{:x}", self.secret_hash);
+        let secret_size = format!("{:0>4x}", Secret::LENGTH_U8);
 
         let contract_code = Self::CONTRACT_CODE_TEMPLATE
             .to_string()
             .replace(Self::REFUND_TIMEOUT_PLACEHOLDER, &refund_timeout)
             .replace(Self::REDEEM_ADDRESS_PLACEHOLDER, &redeem_address)
             .replace(Self::REFUND_ADDRESS_PLACEHOLDER, &refund_address)
-            .replace(Self::SECRET_HASH_PLACEHOLDER, &secret_hash);
+            .replace(Self::SECRET_HASH_PLACEHOLDER, &secret_hash)
+            .replace(Self::SECRET_SIZE_PLACEHOLDER, &secret_size);
 
         let code_length = contract_code.len() / 2; // In hex, each byte is two chars
 
