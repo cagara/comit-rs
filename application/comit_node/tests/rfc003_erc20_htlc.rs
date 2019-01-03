@@ -269,7 +269,7 @@ fn given_htlc_and_refund_should_emit_refund_log_msg() {
 }
 
 #[test]
-fn given_funded_erc20_htlc_when_redeemed_with_short_secret_then_tokens_are_transferred() {
+fn given_funded_erc20_htlc_when_redeemed_with_short_secret_then_tokens_are_not_transferred() {
     let docker = Cli::default();
     let secret = CustomSizeSecret(vec![
         1u8, 2u8, 3u8, 4u8, 6u8, 6u8, 7u8, 9u8, 10u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
@@ -302,7 +302,10 @@ fn given_funded_erc20_htlc_when_redeemed_with_short_secret_then_tokens_are_trans
         Some(Bytes(vec![1u8, 2u8, 3u8, 4u8, 6u8, 6u8, 7u8, 9u8, 10u8])),
     );
 
-    assert_eq!(client.token_balance_of(token, htlc_address), U256::from(0));
+    assert_eq!(
+        client.token_balance_of(token, htlc_address),
+        U256::from(400)
+    );
     assert_eq!(client.token_balance_of(token, alice), U256::from(600));
-    assert_eq!(client.token_balance_of(token, bob), U256::from(400));
+    assert_eq!(client.token_balance_of(token, bob), U256::from(0));
 }

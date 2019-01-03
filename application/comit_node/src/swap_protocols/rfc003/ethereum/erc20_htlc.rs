@@ -1,6 +1,6 @@
 use crate::swap_protocols::rfc003::{
     ethereum::{ByteCode, Htlc, Seconds},
-    SecretHash,
+    Secret, SecretHash,
 };
 use ethereum_support::{web3::types::Bytes, Address, U256};
 
@@ -26,6 +26,7 @@ impl Erc20Htlc {
         "5000000000000000000000000000000000000000000000000000000000000005";
     const TOKEN_CONTRACT_ADDRESS_PLACEHOLDER: &'static str =
         "6000000000000000000000000000000000000006";
+    const SECRET_SIZE_PLACEHOLDER: &'static str = "7007";
 
     const DEPLOY_HEADER_TEMPLATE: &'static str =
         include_str!("./contract_templates/out/erc20_deploy_header.asm.hex");
@@ -96,6 +97,7 @@ impl Htlc for Erc20Htlc {
         let redeem_address = format!("{:x}", self.redeem_address);
         let refund_address = format!("{:x}", self.refund_address);
         let secret_hash = format!("{:x}", self.secret_hash);
+        let secret_size = format!("{:0>4x}", Secret::LENGTH_U8);
 
         let token_contract_address = format!("{:x}", self.token_contract_address);
         let amount = format!("{:0>64}", format!("{:x}", self.amount));
@@ -110,7 +112,8 @@ impl Htlc for Erc20Htlc {
             .replace(
                 Self::TOKEN_CONTRACT_ADDRESS_PLACEHOLDER,
                 &token_contract_address,
-            );
+            )
+            .replace(Self::SECRET_SIZE_PLACEHOLDER, &secret_size);
 
         trace!("Final contract code: {}", &contract_code);
 
