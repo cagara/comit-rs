@@ -3,6 +3,7 @@
 
 #[macro_use]
 extern crate log;
+use directories;
 
 use comit_node::{
     comit_client, comit_server,
@@ -56,7 +57,14 @@ fn main() -> Result<(), failure::Error> {
 }
 
 fn load_settings() -> Result<ComitNodeSettings, config::ConfigError> {
-    let comit_config_path = var_or_default("COMIT_NODE_CONFIG_PATH", "~/.config/comit_node".into());
+    let user_dirs = directories::UserDirs::new().unwrap();
+    let default_config = format!(
+        "{}{}",
+        user_dirs.home_dir().display(),
+        "/.config/comit_node"
+    );
+
+    let comit_config_path = var_or_default("COMIT_NODE_CONFIG_PATH", default_config.into());
     let run_mode_config = var_or_default("RUN_MODE", "development".into());
     let default_config = format!("{}/{}", comit_config_path.trim(), "default");
     let run_mode_config = format!("{}/{}", comit_config_path.trim(), run_mode_config);
